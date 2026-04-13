@@ -1,0 +1,65 @@
+name: DiseasePredict CI Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+
+    services:
+      # MySQL Service Setup (তোর settings.py এর সাথে মিল রেখে)
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+          MYSQL_DATABASE: disease_db
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Cache Python packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install mysqlclient
+
+      - name: Run Database Migrations
+        run: |
+          python manage.py migrate
+        env:
+          DB_NAME: disease_db
+          DB_USER: root
+          DB_PASSWORD: ""
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+
+      - name: Run Django Tests
+        run: |
+          python manage.py test
+        env:
+          DB_NAME: disease_db
+          DB_USER: root
+          DB_PASSWORD: ""
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
