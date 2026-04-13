@@ -11,7 +11,6 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
-      # MySQL Service Setup (তোর settings.py এর সাথে মিল রেখে)
       mysql:
         image: mysql:8.0
         env:
@@ -30,21 +29,16 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Cache Python packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
       - name: Install Dependencies
+        # 'working-directory' ব্যবহার করে আমরা গিটহাবকে disease ফোল্ডারে ঢোকালাম
+        working-directory: ./disease
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install mysqlclient
 
       - name: Run Database Migrations
+        working-directory: ./disease
         run: |
           python manage.py migrate
         env:
@@ -55,6 +49,7 @@ jobs:
           DB_PORT: 3306
 
       - name: Run Django Tests
+        working-directory: ./disease
         run: |
           python manage.py test
         env:
