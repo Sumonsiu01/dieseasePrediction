@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Patient Registration - DiseasePredict</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    html { scroll-behavior: smooth; }
+    body {
+      margin:0;
+      font-family:sans-serif;
+      transition: all 0.5s ease;
+      color:white;
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #3b82f6 100%);
+      min-height: 100vh;
+    }
+    body.light-mode { 
+      background: linear-gradient(135deg, #f0f4f8 0%, #e0f2fe 100%);
+      color:#1e293b; 
+    }
+
+    .glass {
+      backdrop-filter: blur(12px);
+      background: rgba(0,0,0,0.45);
+      border-radius: 1rem;
+      padding: 2rem 1.5rem;
+      border:1px solid rgba(255,255,255,0.15);
+      transition: all 0.4s;
+      max-width: 380px;
+      width:100%;
+    }
+    body.light-mode .glass {
+      background: rgba(255,255,255,0.95);
+      border:1px solid rgba(0,0,0,0.05);
+      color:#1e293b;
+    }
+
+    .form-group { position: relative; margin-bottom: 1rem; }
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 1rem 0.75rem 0.25rem 0.75rem;
+      border-radius: 0.65rem;
+      border: 1px solid rgba(255,255,255,0.3);
+      background-color: rgba(255,255,255,0.05);
+      color:white;
+      font-size: 0.95rem;
+      transition: all 0.3s;
+    }
+    body.light-mode .form-group input,
+    body.light-mode .form-group select {
+      background-color: white;
+      color:#1e293b;
+      border:1px solid #cbd5e1;
+    }
+
+    .form-group select option {
+      color: #1e293b; background:white;
+    }
+    body:not(.light-mode) .form-group select option {
+      color:white; background:#1e293b;
+    }
+
+    .form-group label {
+      position: absolute;
+      top: 50%;
+      left: 0.75rem;
+      transform: translateY(-50%);
+      color: rgba(255,255,255,0.7);
+      pointer-events: none;
+      transition: all 0.3s;
+      background: transparent;
+      padding: 0 0.25rem;
+      font-size: 0.9rem;
+    }
+    body.light-mode .form-group label { color: #64748b; }
+
+    .form-group input:focus + label,
+    .form-group input:not(:placeholder-shown) + label,
+    .form-group select:focus + label,
+    .form-group select[value]:not([value=""]) + label {
+      top: -0.4rem;
+      left: 0.5rem;
+      font-size: 0.7rem;
+      color: #6366f1;
+      background: none;
+    }
+    body.light-mode .form-group input:focus + label,
+    body.light-mode .form-group input:not(:placeholder-shown) + label,
+    body.light-mode .form-group select:focus + label,
+    body.light-mode .form-group select[value]:not([value=""]) + label {
+      color: #2563eb;
+    }
+
+    .btn-glow {
+      background: #6366f1;
+      color:white;
+      font-weight:600;
+      padding: 12px 24px;
+      border-radius:0.65rem;
+      border:none;
+      cursor:pointer;
+      transition: all 0.3s ease-in-out;
+      width:100%;
+      font-size:0.95rem;
+    }
+    .btn-glow:hover { transform: scale(1.03); box-shadow: 0 0 20px rgba(99,102,241,0.6); background:#4f46e5; }
+
+    .login-link { text-align:center; margin-top:0.8rem; font-size:0.85rem; }
+    .login-link a { color:#60a5fa; text-decoration:underline; }
+    body.light-mode .login-link a { color:#2563eb; }
+
+    .hidden-section { opacity:0; transform: translateY(30px); transition: all 0.8s ease; }
+    .show { opacity:1; transform: translateY(0); }
+
+    /* messages */
+    .messages { margin-bottom: 1rem; }
+    .messages li { margin:4px 0; font-size:0.85rem; }
+    .messages li.success { color: #4ade80; }   /* green */
+    .messages li.error { color: #f87171; }     /* red */
+  </style>
+</head>
+
+<body class="flex flex-col min-h-screen">
+
+  <!-- Navbar -->
+  <nav class="fixed w-full top-0 z-50 flex justify-between items-center px-4 py-2">
+    <div class="text-lg font-bold">DiseasePredict</div>
+    <div class="flex items-center space-x-3 text-sm">
+      <a href="{% url 'home' %}">Home</a>
+      <a href="{% url 'login' %}">Login</a>
+      <a href="{% url 'register' %}">Register</a>
+    </div>
+  </nav>
+
+  <!-- Main content -->
+  <main class="flex-grow flex items-center justify-center px-4 pt-20 pb-8">
+    <div class="glass hidden-section">
+      <h1 class="text-2xl font-bold mb-4 text-center">Patient Registration</h1>
+
+      <!-- Display messages -->
+      {% if messages %}
+      <ul class="messages">
+        {% for message in messages %}
+          <li class="{% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+
+      <form class="space-y-4" method="POST" action="{% url 'reg_user' %}" autocomplete="off"> {% comment %} এখানে action বলতে Django কে বলা হচ্ছে কোন view/URL এ form submit হবে। {% endcomment %}
+        {% csrf_token %}
+
+        <div class="form-group">
+          <input type="text" name="full_name" placeholder=" " required />
+          <label>Full Name</label>
+        </div>
+
+        <div class="form-group">
+          <input type="email" name="email" placeholder=" " required />
+          <label>Email</label>
+        </div>
+
+        <div class="form-group">
+          <input type="tel" name="phone" placeholder=" " required />
+          <label>Phone Number</label>
+        </div>
+
+        <div class="form-group">
+          <input type="password" name="password" placeholder=" " required autocomplete="new-password"/>
+          <label>Password</label>
+        </div>
+
+        <div class="form-group">
+          <input type="number" name="age" placeholder=" " required />
+          <label>Age</label>
+        </div>
+
+        <div class="form-group">
+          <select name="gender" required>
+            <option value="" disabled selected></option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="other">Other</option>
+          </select>
+          <label>Gender</label>
+        </div>
+
+        <button type="submit" class="btn-glow">Register</button>
+      </form>
+
+      <div class="login-link">
+        Already have an account? <a href="{% url 'login' %}">Login</a>
+      </div>
+    </div>
+  </main>
+
+  <footer class="text-center py-4 text-white bg-black/30 mt-auto text-sm">
+    &copy; 2026 DiseasePredict
+  </footer>
+
+  <script>
+    // Scroll animation
+    const observer = new IntersectionObserver(entries=>{
+      entries.forEach(entry=>{ if(entry.isIntersecting) entry.target.classList.add('show'); });
+    });
+    document.querySelectorAll('.hidden-section').forEach(el => observer.observe(el));
+  </script>
+
+</body>
+</html>

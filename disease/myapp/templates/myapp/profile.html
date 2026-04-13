@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile | DiseasePredict</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <style>
+        body { background: #f8fafc; font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .nav-link { transition: all 0.3s ease; }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+<nav class="fixed top-0 w-full z-50 backdrop-blur-xl bg-white/80 border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="text-xl font-extrabold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent tracking-tighter">DiseasePredict</div>
+        <div class="flex items-center gap-4">
+            <a href="{% url 'patient_home' %}" class="text-sm font-bold text-gray-600 hover:text-blue-600 nav-link">Dashboard</a>
+            <a href="{% url 'logout' %}" class="px-4 py-2 bg-red-50 text-red-600 rounded-lg text-sm font-bold hover:bg-red-100 transition shadow-sm">Logout</a>
+        </div>
+    </div>
+</nav>
+
+<div class="max-w-5xl mx-auto mt-24 px-4 pb-20">
+    
+    {% if messages %}
+        {% for message in messages %}
+        <div class="mb-6 p-4 rounded-2xl flex items-center gap-3 shadow-sm animate__animated animate__fadeInDown {% if message.tags == 'success' %}bg-emerald-50 text-emerald-700 border border-emerald-100{% else %}bg-rose-50 text-rose-700 border border-rose-100{% endif %}">
+            <span>{% if message.tags == 'success' %}✅{% else %}⚠️{% endif %}</span>
+            <p class="font-bold text-sm">{{ message }}</p>
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <div class="lg:col-span-1">
+            <div class="glass p-8 rounded-[2.5rem] shadow-xl text-center animate__animated animate__fadeInLeft border border-white">
+                <div class="relative inline-block group">
+                    <img src="https://ui-avatars.com/api/?name={{ user.first_name|default:user.username }}&size=150&background=4f46e5&color=fff" 
+                         class="w-32 h-32 rounded-full border-4 border-white shadow-2xl mx-auto transform group-hover:scale-105 transition duration-500">
+                    <div class="absolute bottom-1 right-1 w-6 h-6 bg-emerald-500 border-4 border-white rounded-full"></div>
+                </div>
+                <h2 class="mt-5 text-2xl font-black text-slate-800 tracking-tight">{{ user.first_name|default:user.username }}</h2>
+                <p class="text-slate-400 text-sm font-medium">{{ user.email }}</p>
+                
+                <div class="mt-8 flex flex-col gap-3">
+                    <button onclick="showTab('info')" id="btn-info" class="tab-btn w-full py-3.5 bg-blue-600 text-white rounded-2xl font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all active:scale-95">General Info</button>
+                    <button onclick="showTab('security')" id="btn-security" class="tab-btn w-full py-3.5 bg-white text-slate-600 rounded-2xl font-bold border border-slate-100 hover:bg-slate-50 transition-all active:scale-95">Security & Password</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-2">
+            
+            <div id="info" class="tab-content active glass p-8 rounded-[2.5rem] shadow-xl animate__animated animate__fadeInUp border border-white">
+                <h3 class="text-xl font-black text-slate-800 mb-6 flex items-center gap-2">
+                    <span class="p-2 bg-blue-50 rounded-lg text-blue-600 text-sm">👤</span> Account Settings
+                </h3>
+                
+                <form action="{% url 'update_profile' %}" method="POST" class="space-y-6">
+                    {% csrf_token %} 
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Full Name</label>
+                            <input type="text" name="full_name" value="{{ user.first_name }}" placeholder="Enter full name" 
+                                   class="w-full p-4 bg-slate-50/50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-blue-400 focus:bg-white transition-all">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Phone Number</label>
+                            <input type="text" name="phone" value="{{ user.phonenumber }}" placeholder="Enter phone number" 
+                                   class="w-full p-4 bg-slate-50/50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-blue-400 focus:bg-white transition-all">
+                        </div>
+                    </div>
+                    <button type="submit" class="px-10 py-4 bg-emerald-500 text-white font-bold rounded-2xl shadow-lg shadow-emerald-100 hover:bg-emerald-600 hover:-translate-y-1 transition-all active:translate-y-0">
+                        Save Changes
+                    </button>
+                </form>
+
+                <div class="my-10 border-t border-slate-100"></div>
+
+                <h3 class="text-xl font-black text-slate-800 mb-5 flex items-center gap-2">
+                    <span class="p-2 bg-indigo-50 rounded-lg text-indigo-600 text-sm">📱</span> Active Session
+                </h3>
+                <div class="flex items-center justify-between p-5 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-[2rem] border border-blue-100/50">
+                    <div class="flex items-center gap-4">
+                        <div class="p-3.5 bg-white rounded-2xl text-blue-600 shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="font-bold text-slate-800">Windows PC • Chrome</p>
+                            <p class="text-xs text-slate-500 font-medium tracking-tight">Last login: {{ user.last_login|date:"D, d M Y | h:i A" }}</p>
+                        </div>
+                    </div>
+                    <span class="px-4 py-1.5 bg-white text-emerald-500 text-[9px] font-black rounded-full shadow-sm border border-emerald-50 uppercase tracking-tighter">Verified</span>
+                </div>
+            </div>
+
+            <div id="security" class="tab-content glass p-8 rounded-[2.5rem] shadow-xl animate__animated animate__fadeInUp border border-white">
+                <h3 class="text-xl font-black text-slate-800 mb-6 flex items-center gap-2">
+                    <span class="p-2 bg-rose-50 rounded-lg text-rose-600 text-sm">🔒</span> Update Security
+                </h3>
+                
+                <form action="{% url 'change_password' %}" method="POST" class="space-y-5">
+                    {% csrf_token %}
+                    <div class="space-y-4">
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Current Password</label>
+                            <input type="password" name="old_password" required placeholder="••••••••" 
+                                   class="w-full p-4 bg-slate-50/50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-rose-400 transition-all">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">New Password</label>
+                            <input type="password" name="new_password1" required placeholder="••••••••" 
+                                   class="w-full p-4 bg-slate-50/50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-blue-400 transition-all">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Confirm New Password</label>
+                            <input type="password" name="new_password2" required placeholder="••••••••" 
+                                   class="w-full p-4 bg-slate-50/50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-blue-400 transition-all">
+                        </div>
+                    </div>
+                    <button type="submit" class="px-10 py-4 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg shadow-indigo-100 hover:bg-indigo-700 hover:-translate-y-1 transition-all active:translate-y-0">
+                        Update Password
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    function showTab(tabId) {
+        // Hide all contents
+        document.querySelectorAll('.tab-content').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        
+        // Show selected content
+        document.getElementById(tabId).classList.add('active');
+        
+        // Update button styles
+        const infoBtn = document.getElementById('btn-info');
+        const securityBtn = document.getElementById('btn-security');
+        
+        if(tabId === 'info') {
+            infoBtn.className = "tab-btn w-full py-3.5 bg-blue-600 text-white rounded-2xl font-bold shadow-lg shadow-blue-200 transition-all active:scale-95";
+            securityBtn.className = "tab-btn w-full py-3.5 bg-white text-slate-600 rounded-2xl font-bold border border-slate-100 hover:bg-slate-50 transition-all active:scale-95";
+        } else {
+            securityBtn.className = "tab-btn w-full py-3.5 bg-blue-600 text-white rounded-2xl font-bold shadow-lg shadow-blue-200 transition-all active:scale-95";
+            infoBtn.className = "tab-btn w-full py-3.5 bg-white text-slate-600 rounded-2xl font-bold border border-slate-100 hover:bg-slate-50 transition-all active:scale-95";
+        }
+    }
+</script>
+
+</body>
+</html>

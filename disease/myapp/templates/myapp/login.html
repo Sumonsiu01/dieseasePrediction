@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Patient Login - DiseasePredict</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
+    
+    html { scroll-behavior: smooth; }
+    body { 
+        margin:0; 
+        font-family: 'Inter', sans-serif; 
+        transition: all 0.5s ease; 
+        color:white; 
+        background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #3b82f6 100%); 
+        min-height: 100vh; 
+    }
+    body.light-mode { background: linear-gradient(135deg, #f0f4f8 0%, #e0f2fe 100%); color:#1e293b; }
+
+    .glass { 
+        backdrop-filter: blur(16px); 
+        background: rgba(255, 255, 255, 0.05); 
+        border-radius: 2rem; 
+        padding: 3rem 2rem; 
+        border: 1px solid rgba(255, 255, 255, 0.1); 
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+        max-width: 420px; 
+        width: 100%; 
+    }
+    body.light-mode .glass { 
+        background: rgba(255, 255, 255, 0.8); 
+        border: 1px solid rgba(255, 255, 255, 0.3); 
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.05);
+    }
+    .glass:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+
+    .form-group { position: relative; margin-bottom: 1.5rem; }
+    .form-group input { 
+        width: 100%; 
+        padding: 1.25rem 1rem 0.5rem 1rem; 
+        border-radius: 1rem; 
+        border: 1px solid rgba(255, 255, 255, 0.2); 
+        background: rgba(255, 255, 255, 0.05); 
+        color: white; 
+        font-size: 1rem; 
+        transition: all 0.3s; 
+        outline: none;
+    }
+    body.light-mode .form-group input { 
+        background: #f8fafc; 
+        color: #1e293b; 
+        border: 1px solid #e2e8f0; 
+    }
+    .form-group input:focus { border-color: #6366f1; ring: 2px; ring-color: #6366f1; }
+
+    .form-group label { 
+        position: absolute; 
+        top: 50%; 
+        left: 1rem; 
+        transform: translateY(-50%); 
+        color: rgba(255, 255, 255, 0.5); 
+        pointer-events: none; 
+        transition: all 0.3s; 
+        font-size: 0.9rem; 
+    }
+    body.light-mode .form-group label { color: #94a3b8; }
+    
+    .form-group input:focus + label,
+    .form-group input:not(:placeholder-shown) + label { 
+        top: 0.7rem; 
+        font-size: 0.7rem; 
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #818cf8; 
+    }
+
+    .btn-glow { 
+        background: #4f46e5; 
+        color: white; 
+        font-weight: 700; 
+        padding: 1rem; 
+        border-radius: 1rem; 
+        transition: all 0.3s; 
+        width: 100%; 
+        box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.4);
+    }
+    .btn-glow:hover { transform: scale(1.02); background: #4338ca; box-shadow: 0 20px 25px -5px rgba(79, 70, 229, 0.5); }
+    .btn-glow:disabled { opacity: 0.7; cursor: not-allowed; }
+
+    #themeToggle { 
+        background: rgba(255, 255, 255, 0.1); 
+        backdrop-filter: blur(8px);
+        width: 40px; 
+        height: 40px; 
+        border-radius: 12px; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center;
+        transition: all 0.3s;
+    }
+  </style>
+</head>
+
+<body class="flex flex-col min-h-screen">
+
+  <nav class="fixed w-full top-0 z-50 px-6 py-4 flex justify-between items-center backdrop-blur-md border-b border-white/10">
+    <div class="text-2xl font-black tracking-tighter bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
+        DiseasePredict
+    </div>
+    <div class="flex items-center space-x-6">
+      <a href="{% url 'home' %}" class="text-sm font-bold opacity-80 hover:opacity-100 transition">Home</a>
+      <a href="{% url 'register' %}" class="text-sm font-bold opacity-80 hover:opacity-100 transition">Register</a>
+      <button id="themeToggle" class="hover:bg-white/20">🌙</button>
+    </div>
+  </nav>
+
+  <main class="flex-grow flex items-center justify-center px-4 pt-24 pb-12">
+    <div class="glass hidden-section animate__animated animate__fadeInUp">
+      <h1 class="text-3xl font-black mb-2 text-center tracking-tight">Welcome Back</h1>
+      <p class="text-center text-sm opacity-60 mb-8 font-medium">Please enter your details to login</p>
+
+      {% if messages %}
+        <div class="mb-6 space-y-2">
+          {% for message in messages %}
+            <div class="p-4 rounded-xl text-xs font-bold flex items-center gap-3 animate__animated animate__shakeX 
+              {% if message.tags == 'error' %} bg-red-500/20 text-red-200 border border-red-500/40 
+              {% else %} bg-emerald-500/20 text-emerald-200 border border-emerald-500/40 {% endif %}">
+              <span>{% if message.tags == 'error' %}⚠️{% else %}✅{% endif %}</span>
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <form id="loginForm" class="space-y-4" method="POST" action="{% url 'login' %}" autocomplete="off">
+        {% csrf_token %}
+
+        <div class="form-group">
+          <input type="email" name="email" id="email" placeholder=" " required />
+          <label for="email">Email Address</label>
+        </div>
+
+        <div class="form-group">
+          <input type="password" name="password" id="password" placeholder=" " required />
+          <label for="password">Password</label>
+          <button type="button" onclick="togglePassword()" class="absolute right-4 top-5 opacity-40 hover:opacity-100 transition">
+            <span id="eyeIcon">👁️</span>
+          </button>
+        </div>
+
+        <div class="flex items-center justify-between mb-6 px-1">
+            <label class="flex items-center text-xs font-medium cursor-pointer">
+                <input type="checkbox" class="mr-2 accent-indigo-500"> Remember me
+            </label>
+            <a href="#" class="text-xs font-bold text-indigo-400 hover:text-indigo-300">Forgot?</a>
+        </div>
+
+        <button type="submit" id="submitBtn" class="btn-glow flex items-center justify-center gap-2">
+          <span id="btnText">Login</span>
+          <div id="loader" class="hidden w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+        </button>
+      </form>
+
+      <div class="mt-8 text-center text-sm font-medium opacity-70">
+        Don't have an account? 
+        <a href="{% url 'register' %}" class="text-indigo-400 font-extrabold hover:underline ml-1">Create Account</a>
+      </div>
+    </div>
+  </main>
+
+  <footer class="text-center py-6 text-xs font-medium opacity-50">
+    &copy; 2026 DiseasePredict • Built with Health in Mind
+  </footer>
+
+  <script>
+    // Intersection Observer for animations
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => { if(entry.isIntersecting) entry.target.classList.add('show'); });
+    });
+    document.querySelectorAll('.hidden-section').forEach(el => observer.observe(el));
+
+    // Theme Toggle Logic
+    const toggleBtn = document.getElementById("themeToggle");
+    const body = document.body;
+    
+    if(localStorage.getItem("theme") === "light"){ 
+        body.classList.add("light-mode"); 
+        toggleBtn.textContent = "☀️"; 
+    }
+
+    toggleBtn.addEventListener("click", () => {
+      body.classList.toggle("light-mode");
+      if(body.classList.contains("light-mode")){ 
+          localStorage.setItem("theme", "light"); 
+          toggleBtn.textContent = "☀️"; 
+      } else { 
+          localStorage.setItem("theme", "dark"); 
+          toggleBtn.textContent = "🌙"; 
+      }
+    });
+
+    // Password Visibility Toggle
+    function togglePassword() {
+        const passInput = document.getElementById('password');
+        const eye = document.getElementById('eyeIcon');
+        if (passInput.type === 'password') {
+            passInput.type = 'text';
+            eye.textContent = '🔒';
+        } else {
+            passInput.type = 'password';
+            eye.textContent = '👁️';
+        }
+    }
+
+    // Loading state on submit
+    const loginForm = document.getElementById('loginForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const loader = document.getElementById('loader');
+    const btnText = document.getElementById('btnText');
+
+    loginForm.addEventListener('submit', () => {
+        submitBtn.disabled = true;
+        loader.classList.remove('hidden');
+        btnText.textContent = 'Signing in...';
+    });
+  </script>
+
+</body>
+</html>

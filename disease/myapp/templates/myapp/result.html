@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis Result</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <style>
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .animated-bg {
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+
+<body class="bg-slate-100 min-h-screen flex items-center justify-center p-4">
+
+<div class="max-w-2xl w-full glass-card p-6 md:p-10 rounded-3xl shadow-2xl animate__animated animate__zoomIn">
+
+    <div class="text-center mb-6">
+        <div class="inline-block p-3 bg-blue-100 rounded-full mb-4 animate__animated animate__bounceIn animate__delay-1s">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        </div>
+        <h1 class="text-3xl font-black text-slate-800 tracking-tight">Report Summary</h1>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+        <div class="bg-red-50 border-l-4 border-red-500 p-5 rounded-2xl transform transition hover:scale-105 duration-300">
+            <p class="text-red-600 text-xs font-bold uppercase tracking-widest">Detected Condition</p>
+            <h2 class="text-xl font-black text-slate-900 mt-1">{{ prediction }}</h2>
+        </div>
+
+        <div class="bg-emerald-50 border-l-4 border-emerald-500 p-5 rounded-2xl transform transition hover:scale-105 duration-300">
+            <p class="text-emerald-600 text-xs font-bold uppercase tracking-widest">Suggested Care</p>
+            <h2 class="text-xl font-black text-slate-900 mt-1">{{ suggested_drug }}</h2>
+        </div>
+    </div>
+
+    <div class="mb-8">
+        <h3 class="text-sm font-bold text-slate-500 uppercase mb-3 text-center">Analyzed Symptoms</h3>
+        <div class="flex flex-wrap justify-center gap-2">
+            {% for s in symptoms %}
+            <span class="px-4 py-1.5 bg-slate-200 text-slate-700 text-xs font-semibold rounded-full animate__animated animate__fadeInUp">
+                {{ s }}
+            </span>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="bg-amber-50 border border-amber-200 p-3 rounded-xl mb-8 animate__animated animate__flash animate__delay-2s">
+        <p class="text-[10px] text-amber-700 text-center leading-tight font-medium">
+            ⚠️ <strong>AI DISCLAIMER:</strong> This is an automated result. Please do not self-medicate. 
+            Consult a certified medical professional for a final diagnosis.
+        </p>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+        <a href="{% url 'predict' %}" 
+           class="flex items-center justify-center px-6 py-4 bg-slate-800 text-white rounded-2xl font-bold hover:bg-slate-900 transition-all active:scale-95 shadow-lg">
+           🔄 Re-Check
+        </a>
+        <a href="{% url 'patient_home' %}" 
+           class="flex items-center justify-center px-6 py-4 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-700 transition-all active:scale-95 shadow-lg">
+           🏠 Dashboard
+        </a>
+    </div>
+
+    <p class="text-center text-[10px] text-slate-400 mt-6 font-mono">
+        Engine: {{ model_used }} | Instance ID: #{{ 1024|add:1 }}
+    </p>
+
+</div>
+
+</body>
+</html>

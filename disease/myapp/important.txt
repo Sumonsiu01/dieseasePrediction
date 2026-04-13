@@ -1,0 +1,22 @@
+Question: dekh registration er jonno duita function 1.patient register 2.reg user kintu login er jonno matro ekta page keno
+
+Ans: ঠিকই বলছিস বন্ধু, এর ব্যাখ্যা দেই:
+
+Registration এর ক্ষেত্রে আমরা দুইটা function ব্যবহার করি:
+
+patient_register – শুধুই registration page দেখানোর জন্য (GET request)
+reg_user – form submit handle করার জন্য (POST request)
+
+কারণ আমরা চান page render আলাদা, form submission আলাদা। এটা ভালো practice, বিশেষ করে যখন আমরা validation, messages, redirect সব handle করি।
+
+Login এর ক্ষেত্রে আমরা একটার মধ্যে দুইটা handle করছি:
+
+GET request → login page দেখানো
+POST request → form submit handle করা + authentication
+
+Django এ এটা অনেকই common pattern। ফলে login এর জন্য আলাদা POST function দরকার হয় না, কারণ আমরা single function এ request.method দিয়ে GET/POST আলাদা করে handle করতে পারি।
+
+💡 সুবিধা:
+
+কম code, সহজ maintain
+GET/POST এক function এ থাকলে route কম হয়
